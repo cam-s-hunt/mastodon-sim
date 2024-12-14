@@ -552,9 +552,9 @@ class MastodonSocialNetworkApp(PhoneApp):
             )
         bio_message = f'Profile updated successfully: "{bio}"'
         self._print(bio_message, emoji="✅")
-        self.action_logger.log(
-            {"source_user": current_user_full, "label": "update_profile", "data": {"new_bio": bio}}
-        )
+        # self.action_logger.log(
+        #    {"source_user": current_user_full, "label": "update_profile", "data": {"new_bio": bio}}
+        # )
 
         return bio_message
 
@@ -633,13 +633,13 @@ class MastodonSocialNetworkApp(PhoneApp):
             f"current_user (@{current_username}) unfollowed target_user (@{target_username})"
         )
         self._print(unfollow_message, emoji="✅")
-        self.action_logger.log(
-            {
-                "source_user": current_user_full,
-                "label": "unfollow",
-                "data": {"target_user": target_user_full},
-            }
-        )
+        # self.action_logger.log(
+        #    {
+        #        "source_user": current_user_full,
+        #        "label": "unfollow",
+        #        "data": {"target_user": target_user_full},
+        #    }
+        # )
         return unfollow_message
 
     # @app_action
@@ -797,13 +797,13 @@ class MastodonSocialNetworkApp(PhoneApp):
             toot_id = return_val["id"]
         else:
             return_msg = f'{current_user} posted a toot!: "{status}"\n'
-        self.action_logger.log(
-            {
-                "source_user": current_user_full,
-                "label": "post",
-                "data": {"toot_id": toot_id, "post_text": status},
-            }
-        )
+        # self.action_logger.log(
+        #    {
+        #        "source_user": current_user_full,
+        #        "label": "post",
+        #        "data": {"toot_id": toot_id, "post_text": status},
+        #    }
+        # )
         return return_msg
 
     @app_action
@@ -855,17 +855,17 @@ class MastodonSocialNetworkApp(PhoneApp):
             return_msg = (
                 f"{current_user} replied to a toot with toot id {in_reply_to_id} : {status}"
             )
-            self.action_logger.log(
-                {
-                    "source_user": current_user_full,
-                    "label": "reply",
-                    "data": {
-                        "reply_to": {"target_user": target_user_full, "toot_id": in_reply_to_id},
-                        "toot_id": toot_id,
-                        "post_text": status,
-                    },
-                }
-            )
+            # self.action_logger.log(
+            #    {
+            #        "source_user": current_user_full,
+            #        "label": "reply",
+            #        "data": {
+            #            "reply_to": {"target_user": target_user_full, "toot_id": in_reply_to_id},
+            #            "toot_id": toot_id,
+            #            "post_text": status,
+            #        },
+            #    }
+            # )
         except ValueError as e:
             self._print(f"Invalid input, regular toot posted: {e!s}", emoji="❌")
             return_msg = f'''There was an error in posting {current_user}'s reply, response was posted as a new toot!: "{status}"'''
@@ -958,13 +958,13 @@ class MastodonSocialNetworkApp(PhoneApp):
         )
         str_timeline = self.print_and_return_timeline(timeline)
 
-        self.action_logger.log(
-            {
-                "source_user": current_user_full,
-                "label": "get_own_timeline",
-                "data": {"num_posts_retreived": len(timeline)},  # TODO: add timeline here
-            }
-        )
+        # self.action_logger.log(
+        #    {
+        #        "source_user": current_user_full,
+        #        "label": "get_own_timeline",
+        #        "data": {"num_posts_retreived": len(timeline)},  # TODO: add timeline here
+        #    }
+        # )
 
         return "Own Mastodon Timeline:\n" + str_timeline
 
@@ -1050,15 +1050,15 @@ class MastodonSocialNetworkApp(PhoneApp):
         notifications_string = self.print_notifications(notifications)
         full_output = f"{retrieval_message}\n{notifications_string}"
         self._print(full_output)
-        self.action_logger.log(
-            {
-                "source_user": current_user_full,
-                "label": "read_notification",
-                "data": {
-                    "num_notifications_retreived": len(notifications)
-                },  # TODO: add notifications timeline here
-            }
-        )
+        # self.action_logger.log(
+        #    {
+        #        "source_user": current_user_full,
+        #        "label": "read_notification",
+        #        "data": {
+        #            "num_notifications_retreived": len(notifications)
+        #        },  # TODO: add notifications timeline here
+        #    }
+        # )
 
         return full_output
 
@@ -1085,13 +1085,13 @@ class MastodonSocialNetworkApp(PhoneApp):
                 color="light_grey",
             )
         self._print(like_message, emoji="✅")
-        self.action_logger.log(
-            {
-                "source_user": current_user_full,
-                "label": "like_toot",
-                "data": {"toot_id": toot_id, "target_user": target_user_full},
-            }
-        )
+        # self.action_logger.log(
+        #    {
+        #        "source_user": current_user_full,
+        #        "label": "like_toot",
+        #        "data": {"toot_id": toot_id, "target_user": target_user_full},
+        #    }
+        # )
         return like_message
 
     # region[additional methods]
@@ -1116,13 +1116,13 @@ class MastodonSocialNetworkApp(PhoneApp):
             f"@{current_username} boosted post {toot_id}",
             emoji="✅",
         )
-        self.action_logger.log(
-            {
-                "source_user": current_user_full,
-                "label": "boost_toot",
-                "data": {"toot_id": toot_id, "target_user": target_user_full},
-            }
-        )
+        # self.action_logger.log(
+        #    {
+        #        "source_user": current_user_full,
+        #        "label": "boost_toot",
+        #        "data": {"toot_id": toot_id, "target_user": target_user_full},
+        #    }
+        # )
 
     # @app_action
     # def block_user(self, current_user: str, target_user: str) -> None:

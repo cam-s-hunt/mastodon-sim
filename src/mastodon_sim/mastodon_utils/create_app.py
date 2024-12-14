@@ -7,8 +7,6 @@ Warning: this is not intended to be used multiple times! This should only be run
 
 from mastodon import Mastodon
 
-domain_name = "social-sandbox.com"
+domain_name = "mastodon.genexergy.org"
 
-Mastodon.create_app(
-    "MyMastodonApp", api_base_url=f"https://{domain_name}", to_file="clientcred.secret"
-)
+Mastodon.create_app("masto-sim", api_base_url=f"https://{domain_name}", to_file="clientcred.secret")

@@ -141,7 +141,7 @@ def main() -> None:
     parser.add_argument(
         "--domain",
         type=str,
-        default="social-sandbox.com",
+        default="mastodon.genexergy.org",
         help="The domain of the Mastodon instance.",
     )
     parser.add_argument(

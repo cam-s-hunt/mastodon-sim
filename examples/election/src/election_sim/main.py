@@ -18,7 +18,7 @@ from concordia import __file__ as concordia_location
 
 print(f"importing Concordia from: {concordia_location}")
 from concordia.clocks import game_clock
-from concordia.language_model import amazon_bedrock_model, gpt_model
+from concordia.language_model import gpt_model, ollama_model
 from concordia.typing.entity import ActionSpec, OutputType
 
 from mastodon_sim import mastodon_ops
@@ -51,7 +51,7 @@ parser.add_argument(
     "--server",
     type=str,
     default="None",  # www.social-sandbox.com, www.socialsandbox2.com
-    help="config from which to optionally load experiment settings",
+    help="mastodon server url",
 )
 args = parser.parse_args()
 
@@ -72,7 +72,7 @@ if USE_MASTODON_SERVER:
 else:
     input("Sim will not use the Mastodon server. Confirm by pressing any key to continue.")
 
-MODEL_NAME = "gpt-4o-mini"
+MODEL_NAME = "ollama"
 SEED = args.seed
 random.seed(SEED)
 
@@ -99,10 +99,8 @@ def clear_mastodon_server(max_num_players):
 
 
 def select_large_language_model():
-    if "sonnet" in MODEL_NAME:
-        model = amazon_bedrock_model.AmazonBedrockLanguageModel(
-            model_id="anthropic.claude-3-5-sonnet-20240620-v1:0"
-        )
+    if "ollama" in MODEL_NAME:
+        model = ollama_model.OllamaLanguageModel(model_name="gemma2:27b")
     elif "gpt" in MODEL_NAME:
         GPT_API_KEY = os.getenv("OPENAI_API_KEY")
         if not GPT_API_KEY:
