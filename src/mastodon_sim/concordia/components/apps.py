@@ -59,6 +59,26 @@ COLOR_TYPE = (
     | None
 )
 
+import functools
+import time
+
+
+def timed_function(tag="general"):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            start_time = time.time()
+            result = func(*args, **kwargs)
+            end_time = time.time()
+            duration = end_time - start_time
+            with open("time_logger.txt", "a") as f:
+                f.write(f"{tag} - {func.__name__} took {duration:.6f}s on {time.asctime()}\n")
+            return result
+
+        return wrapper
+
+    return decorator
+
 
 def parse_literal(literal_type: type) -> ParserFunc:
     """Parse a literal type."""
@@ -334,7 +354,7 @@ class PhoneApp(metaclass=abc.ABCMeta):
             return getattr(self, action.name)(**processed_args)
         except Exception as e:
             self._print(f"Error invoking action {action.name}: {e}", color="red")
-            return f"Error invoking action {action.name}: {e}"
+            return None
 
 
 # endregion
@@ -369,6 +389,90 @@ class Phone:
 def _parse_argument_text(args_text: str) -> dict[str, str]:
     matches = _ARGUMENT_REGEX.finditer(args_text)
     return {m.group("param"): m.group("value").strip() for m in matches if m.group("value").strip()}
+
+
+@dataclasses.dataclass(frozen=True, slots=True)
+class _Meeting:
+    time: str
+    participant: str
+    title: str
+
+
+# endregion
+
+# region[Calendar App]
+
+
+class ToyCalendar(PhoneApp):
+    """A toy calendar app."""
+
+    def __init__(self):
+        self._meetings = []
+
+    def name(self):
+        """Define the name of the app."""
+        return "Calendar"
+
+    def description(self):
+        """Define the description of the app."""
+        return "Lets you schedule meetings with other people."
+
+    @app_action
+    def add_meeting(self, time: str, participant: str, title: str):
+        """Add a meeting to the calendar.
+        This action schedules a meeting with the participant
+        and sends them a notification about the meeting.
+        Args:
+          time: The time of the meeting, e.g., tomorrow, in two weeks.
+          participant: The name of the participant.
+          title: The title of the meeting, e.g., Alice / John 1:1.
+
+        Returns
+        -------
+          A description of the added meeting.
+
+        Raises
+        ------
+          ActionArgumentError: If the format of any of the arguments is invalid.
+        """
+        meeting = _Meeting(time=time, participant=participant, title=title)
+        self._meetings.append(meeting)
+        output = (
+            f"🗓️ A meeting with '{meeting.participant}' was scheduled at"
+            f" '{meeting.time}' with title '{meeting.title}'."
+        )
+        self._print(output)
+        return output
+
+    @app_action
+    def check_calendar(self, num_recent_meetings: int):
+        """Check the calendar for scheduled meetings.
+        This action checks the calendar to view and confirm meetings.
+        Args:
+            num_recent_meetings (int): The number of most recent meetings to check.
+                                      Use a large number (e.g., 1000) to see all
+                                      meetings.
+
+        Returns
+        -------
+            str: A description of the scheduled meetings.
+        """
+        if not self._meetings:
+            output = "No meetings scheduled."
+        else:
+            meetings_to_check = self._meetings[-num_recent_meetings:]
+            output = f"Scheduled meetings (showing last {num_recent_meetings}):\n"
+            for meeting in meetings_to_check:
+                output += (
+                    f"- Title: '{meeting.title}', Time: '{meeting.time}',"
+                    f" Participant: '{meeting.participant}'\n"
+                )
+
+        self._print(output)
+        return output
+
+
+# endregion
 
 
 # region[Mastodon Social Network App]
@@ -430,13 +534,14 @@ class MastodonSocialNetworkApp(PhoneApp):
         """Public interface to get the username."""
         return self._get_username(display_name)
 
+    @timed_function(tag="app_action")
     @app_action
-    def update_profile(self, current_user: str, bio: str) -> str:
+    def update_profile(self, current_user: str, display_name: str, bio: str) -> str:
         """Update the user's bio."""
         current_user_full = str(current_user)
         current_user = current_user.split()[0]
 
-        username = self._get_username(current_user)
+        username = self._get_username(display_name)
         self._print(f"Updating profile for @{username}: {current_user}", emoji="✏️")
         if self.perform_operations:
             self._mastodon_ops.update_bio(username, current_user, bio)
@@ -495,13 +600,13 @@ class MastodonSocialNetworkApp(PhoneApp):
             f"current_user (@{current_username}) followed target_user (@{target_username})"
         )
         self._print(follow_message, emoji="➕")  # noqa: RUF001
-        self.action_logger.log(
-            {
-                "source_user": current_user_full,
-                "label": "follow",
-                "data": {"target_user": target_user_full},
-            }
-        )
+        # self.action_logger.log(
+        #    {
+        #        "source_user": current_user_full,
+        #        "label": "follow",
+        #        "data": {"target_user": target_user_full},
+        #    }
+        # )
         return follow_message
 
     @app_action
